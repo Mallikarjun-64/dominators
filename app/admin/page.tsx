@@ -15,11 +15,20 @@ import { collection, query, where, onSnapshot, orderBy } from "firebase/firestor
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 
+interface EmailLog {
+  id: string;
+  employeeEmail?: string;
+  sender?: string;
+  subject?: string;
+  safety?: string;
+  analyzedAt: any; // Can be Timestamp or Date
+}
+
 export default function AdminPanel() {
   const { profile, loading } = useAuth();
   const router = useRouter();
   const [employees, setEmployees] = useState<any[]>([]);
-  const [emailLogs, setEmailLogs] = useState<any[]>([]);
+  const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [stats, setStats] = useState({
     totalEmails: 0,
@@ -60,13 +69,13 @@ export default function AdminPanel() {
     // 2. Listen to email logs
     const logsQuery = query(collection(db, "email_logs"), orderBy("analyzedAt", "desc"));
     const unsubscribeLogs = onSnapshot(logsQuery, (snapshot) => {
-      const logs = snapshot.docs.map(doc => {
+      const logs: EmailLog[] = snapshot.docs.map(doc => {
         const data = doc.data();
         return {
           id: doc.id,
           ...data,
           analyzedAt: data.analyzedAt?.toDate() || new Date()
-        };
+        } as EmailLog;
       });
       setEmailLogs(logs);
 
@@ -167,8 +176,9 @@ export default function AdminPanel() {
                  </h3>
               </div>
 
-              <div className="overflow-x-auto">
-                 <table className="w-full text-left border-separate border-spacing-y-4">
+              <div className="overflow-x-auto -mx-6 md:mx-0 px-6 md:px-0">
+                 {/* Desktop Table View */}
+                 <table className="hidden md:table w-full text-left border-separate border-spacing-y-4">
                     <thead>
                        <tr className="text-white/30 text-[10px] font-black uppercase tracking-widest">
                           <th className="px-4">Employee</th>
@@ -205,6 +215,39 @@ export default function AdminPanel() {
                        ))}
                     </tbody>
                  </table>
+
+                 {/* Mobile Card View */}
+                 <div className="md:hidden space-y-4">
+                    {employeeMetrics.map((emp: any) => (
+                       <div key={emp.id} className="glass-light p-4 rounded-2xl border border-white/5 space-y-4">
+                          <div className="flex items-center justify-between">
+                             <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center font-bold text-primary border border-white/10">{emp.name?.charAt(0)}</div>
+                                <div className="min-w-0">
+                                   <div className="text-sm font-bold text-white truncate">{emp.name}</div>
+                                   <div className="text-xs text-white/30 truncate">{emp.email}</div>
+                                </div>
+                             </div>
+                             <button className="p-2 hover:bg-white/10 rounded-lg text-white/30 transition-all"><MoreVertical className="w-5 h-5" /></button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                             <div>
+                                <div className="text-[10px] text-white/30 uppercase font-black tracking-widest mb-1">Sync Count</div>
+                                <div className="text-sm font-mono font-bold text-primary">{emp.scans}</div>
+                             </div>
+                             <div className="text-right">
+                                <div className="text-[10px] text-white/30 uppercase font-black tracking-widest mb-1">Risk Profile</div>
+                                <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border inline-block ${
+                                   emp.risk === "Low" ? "bg-secondary/10 border-secondary/20 text-secondary" : 
+                                   emp.risk === "Medium" ? "bg-warning/10 border-warning/20 text-warning" : "bg-danger/10 border-danger/20 text-danger"
+                                }`}>
+                                   {emp.risk}
+                                </div>
+                             </div>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
               </div>
            </motion.div>
 
@@ -232,7 +275,9 @@ export default function AdminPanel() {
                          dataKey="value"
                          stroke="none"
                        >
-                          {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+                          {pieData.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length] || "#000"} />
+                          ))}
                        </Pie>
                        <Tooltip 
                          contentStyle={{ backgroundColor: "#12121a", borderColor: "#ffffff10", borderRadius: "16px", color: "#fff" }} 
@@ -267,8 +312,9 @@ export default function AdminPanel() {
                  </h3>
               </div>
 
-              <div className="overflow-x-auto">
-                 <table className="w-full text-left">
+              <div className="overflow-x-auto -mx-6 md:mx-0 px-6 md:px-0">
+                 {/* Desktop Table View */}
+                 <table className="hidden md:table w-full text-left">
                     <thead>
                        <tr className="text-white/30 text-[10px] font-black uppercase tracking-widest border-b border-white/5">
                           <th className="pb-4 px-4">Employee</th>
@@ -279,7 +325,7 @@ export default function AdminPanel() {
                        </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                       {emailLogs.map((email: any) => (
+                       {emailLogs.map((email: EmailLog) => (
                           <tr key={email.id} className="group hover:bg-white/[0.02] transition-all">
                              <td className="py-4 px-4">
                                 <div className="text-sm font-bold text-white">{email.employeeEmail}</div>
@@ -305,6 +351,32 @@ export default function AdminPanel() {
                        ))}
                     </tbody>
                  </table>
+
+                 {/* Mobile Card View */}
+                 <div className="md:hidden space-y-4">
+                    {emailLogs.map((email: EmailLog) => (
+                       <div key={email.id} className="glass-light p-4 rounded-2xl border border-white/5 space-y-3">
+                          <div className="flex items-center justify-between">
+                             <div className="text-xs font-bold text-white truncate max-w-[150px]">{email.employeeEmail}</div>
+                             <div className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border ${
+                                email.safety?.toLowerCase() === "safe" ? "bg-secondary/10 border-secondary/20 text-secondary" : 
+                                email.safety?.toLowerCase() === "suspicious" ? "bg-warning/10 border-warning/20 text-warning" : "bg-danger/10 border-danger/20 text-danger"
+                             }`}>
+                                {email.safety}
+                             </div>
+                          </div>
+                          <div>
+                             <div className="text-[9px] text-white/30 uppercase font-black tracking-widest mb-1">Subject</div>
+                             <div className="text-xs text-primary font-bold truncate">{email.subject}</div>
+                             <div className="text-[9px] text-white/50 truncate mt-0.5">{email.sender}</div>
+                          </div>
+                          <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                             <div className="text-[8px] text-white/20 font-mono italic">ID: {email.id.substring(0, 8)}...</div>
+                             <div className="text-[9px] text-white/30 font-mono">{email.analyzedAt.toLocaleString()}</div>
+                          </div>
+                       </div>
+                    ))}
+                 </div>
               </div>
            </motion.div>
         </div>

@@ -163,7 +163,7 @@ export default function InboxScanner() {
                            </div>
                         </div>
                         <div className="flex-1 md:hidden">
-                           <h4 className="text-sm font-bold truncate text-white">{email.sender.split('<')[0].trim()}</h4>
+                           <h4 className="text-sm font-bold truncate text-white">{(email.sender.split('<')[0] || "").trim()}</h4>
                            <p className="text-[10px] text-white/30 uppercase font-black tracking-widest">{email.date}</p>
                         </div>
                         <div className={`md:hidden px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${
@@ -176,7 +176,7 @@ export default function InboxScanner() {
 
                       <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-4 items-center gap-2 md:gap-8 w-full">
                         <div className="hidden md:block col-span-1 min-w-0">
-                           <h4 className="text-sm font-bold truncate text-white">{email.sender.split('<')[0].trim()}</h4>
+                           <h4 className="text-sm font-bold truncate text-white">{(email.sender.split('<')[0] || "").trim()}</h4>
                            <p className="text-[10px] text-white/30 uppercase font-black tracking-widest truncate">{email.date}</p>
                         </div>
                         

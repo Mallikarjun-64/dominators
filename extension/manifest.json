@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "URL Reputation Analyser",
+  "version": "1.0",
+  "description": "Real-time analysis of domain reputation and landing page integrity.",
+  "permissions": [
+    "webNavigation",
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "URL Analyser"
+  }
+}

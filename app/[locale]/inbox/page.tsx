@@ -121,19 +121,19 @@ export default function InboxScanner() {
           <>
             <div className="glass rounded-[32px] md:rounded-[40px] border-white/5 overflow-hidden shadow-2xl">
               <div className="p-4 md:p-6 border-b border-white/5 flex flex-col md:flex-row items-center justify-between bg-white/5 backdrop-blur-3xl gap-4">
-                 <div className="flex items-center space-x-4 w-full md:w-auto">
-                    <div className="relative group w-full md:w-auto">
-                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-primary transition-colors" />
-                       <input
-                          type="text"
-                          placeholder="Search messages..."
-                          className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-sm transition-all w-full md:w-64"
-                       />
-                    </div>
-                 </div>
-                 <div className="flex items-center space-x-2 text-white/50 text-[10px] md:text-xs font-bold tracking-widest uppercase">
-                    <span>{inbox.length} Messages Analyzed</span>
-                 </div>
+                <div className="flex items-center space-x-4 w-full md:w-auto">
+                  <div className="relative group w-full md:w-auto">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-primary transition-colors" />
+                    <input
+                      type="text"
+                      placeholder="Search messages..."
+                      className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:border-primary/50 text-sm transition-all w-full md:w-64"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 text-white/50 text-[10px] md:text-xs font-bold tracking-widest uppercase">
+                  <span>{inbox.length} Messages Analyzed</span>
+                </div>
               </div>
 
               <div className="divide-y divide-white/5 overflow-x-auto">
@@ -185,7 +185,7 @@ export default function InboxScanner() {
                            <p className="text-xs text-white/40 truncate">{email.snippet}</p>
                         </div>
 
-                        <div className="hidden md:flex col-span-1 flex flex-col items-end space-y-1">
+                        <div className="hidden md:flex col-span-1 flex-col items-end space-y-1">
                            <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                               email.classification === "Safe" ? "bg-secondary/10 border-secondary/20 text-secondary" : 
                               email.classification === "Suspicious" ? "bg-warning/10 border-warning/20 text-warning" : "bg-danger/10 border-danger/20 text-danger"

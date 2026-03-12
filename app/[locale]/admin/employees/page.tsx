@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../../../navigation";
 import { db } from "@/services/firebaseConfig";
 import { collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import { registerEmployee } from "@/services/firebaseService";

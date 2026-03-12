@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../../navigation";
 
 const recentReports = [
   { id: 1, name: "Weekly Security Posture", date: "Oct 24 - Oct 31", type: "Excel", size: "4.2 MB" },

@@ -1,5 +1,12 @@
 // warning.js for URL Analyser Extension
 
+// Localization
+document.querySelectorAll("[data-i18n]").forEach(el => {
+  const key = el.getAttribute("data-i18n");
+  const message = chrome.i18n.getMessage(key);
+  if (message) el.textContent = message;
+});
+
 // Extract URL parameters
 const params = new URLSearchParams(window.location.search);
 const url = params.get("url");
@@ -9,7 +16,7 @@ const indicators = JSON.parse(decodeURIComponent(params.get("indicators") || "[]
 
 // Set content
 document.getElementById("url-text").textContent = url;
-document.getElementById("status").textContent = safety === "suspicious" ? "Suspicious Link Detected" : "Phishing Detected";
+document.getElementById("status").textContent = safety === "suspicious" ? chrome.i18n.getMessage("suspiciousDetected") : chrome.i18n.getMessage("phishingDetected");
 document.getElementById("confidence").textContent = `${confidence}%`;
 
 const indicatorsContainer = document.getElementById("indicators-container");

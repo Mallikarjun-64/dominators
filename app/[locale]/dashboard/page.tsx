@@ -25,6 +25,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { collection, query, where, getDocs, orderBy, Timestamp } from "firebase/firestore";
 import { db } from "@/services/firebaseConfig";
+import { useRouter } from "../../../navigation";
 
 const COLORS = ["#10b981", "#f59e0b", "#ef4444"];
 

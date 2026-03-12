@@ -3,8 +3,9 @@
 const API_URL = "http://localhost:8000/api/classify-url";
 
 // Keep track of URLs that the user has already allowed
-// In a real extension, you'd use chrome.storage.local to persist this
 let allowedUrls = new Set();
+// Keep track of URLs currently being analysed to avoid duplicate requests
+let beingAnalysed = new Set();
 
 // Load allowed URLs from storage on startup
 chrome.storage.local.get(["allowedUrls"], (result) => {
@@ -13,54 +14,72 @@ chrome.storage.local.get(["allowedUrls"], (result) => {
   }
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  // Only check when the URL changes and starts with http/https
-  // and we avoid infinite loops by checking if it's already a warning page
-  if (changeInfo.url && 
-      (changeInfo.url.startsWith("http://") || changeInfo.url.startsWith("https://")) && 
-      !changeInfo.url.includes(chrome.runtime.id) &&
-      !changeInfo.url.includes("chrome://") &&
-      !changeInfo.url.includes("edge://") &&
-      !changeInfo.url.includes("about:")) {
-    
-    const url = changeInfo.url;
+// Using webNavigation for more robust interception
+chrome.webNavigation.onBeforeNavigate.addListener((details) => {
+  // Only check top-level frames
+  if (details.frameId !== 0) return;
 
-    // Skip if user already allowed this URL or it's a localhost check
-    // We check if any allowed URL is a prefix of current URL or exact match
-    const isAllowed = Array.from(allowedUrls).some(allowed => url.startsWith(allowed));
-    
-    if (isAllowed || url.includes("localhost:8000")) {
-      return;
-    }
+  const url = details.url;
 
-    console.log("Analysing URL:", url);
-
-    // Call backend API for analysis
-    fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: url }),
-    })
-    .then(response => {
-      if (!response.ok) throw new Error("API not reachable");
-      return response.json();
-    })
-    .then(data => {
-      console.log("Analysis Result:", data);
-      
-      // If safety is not "safe", ask the user
-      if (data && data.safety !== "safe") {
-        // Redirect to a warning page with details
-        const warningUrl = chrome.runtime.getURL(`warning.html?url=${encodeURIComponent(url)}&safety=${data.safety}&confidence=${data.confidence}&indicators=${encodeURIComponent(JSON.stringify(data.indicators))}`);
-        chrome.tabs.update(tabId, { url: warningUrl });
-      }
-    })
-    .catch(error => {
-      console.warn("URL Analysis failed or skipped:", error.message);
-    });
+  // Skip internal, local, and already allowed URLs
+  if (!url || 
+      (!url.startsWith("http://") && !url.startsWith("https://")) ||
+      url.includes(chrome.runtime.id) ||
+      url.includes("localhost:8000") ||
+      url.includes("127.0.0.1") ||
+      url.includes("chrome://") ||
+      url.includes("edge://") ||
+      url.includes("about:")) {
+    return;
   }
+
+  // Check if already allowed
+  const isAllowed = Array.from(allowedUrls).some(allowed => url.startsWith(allowed));
+  if (isAllowed) return;
+
+  // Avoid duplicate analysis for the same URL in a short window
+  if (beingAnalysed.has(url)) return;
+  beingAnalysed.add(url);
+  setTimeout(() => beingAnalysed.delete(url), 5000);
+
+  console.log("Analysing URL:", url);
+
+  // Set badge to indicate scanning
+  chrome.action.setBadgeText({ text: "...", tabId: details.tabId });
+  chrome.action.setBadgeBackgroundColor({ color: "#00ffff", tabId: details.tabId });
+
+  // Call backend API for analysis
+  fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ url: url }),
+  })
+  .then(response => {
+    if (!response.ok) throw new Error("API not reachable");
+    return response.json();
+  })
+  .then(data => {
+    console.log("Analysis Result:", data);
+    
+    // Clear badge
+    chrome.action.setBadgeText({ text: "", tabId: details.tabId });
+
+    if (data && (data.safety === "dangerous" || data.safety === "suspicious")) {
+      // Set danger badge
+      chrome.action.setBadgeText({ text: "!", tabId: details.tabId });
+      chrome.action.setBadgeBackgroundColor({ color: "#ff4d4d", tabId: details.tabId });
+
+      // Block/Redirect to a warning page
+      const warningUrl = chrome.runtime.getURL(`warning.html?url=${encodeURIComponent(url)}&safety=${data.safety}&confidence=${data.confidence}&indicators=${encodeURIComponent(JSON.stringify(data.indicators))}`);
+      chrome.tabs.update(details.tabId, { url: warningUrl });
+    }
+  })
+  .catch(error => {
+    console.warn("URL Analysis failed or skipped:", error.message);
+    chrome.action.setBadgeText({ text: "", tabId: details.tabId });
+  });
 });
 
 // Listen for messages from the warning page

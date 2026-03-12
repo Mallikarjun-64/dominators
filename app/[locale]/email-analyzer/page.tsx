@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Mail, ShieldAlert, AlertCircle, ShieldCheck, ArrowRight, Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../../navigation";
 import { saveEmailAnalysis } from "@/services/firebaseService";
 
 export default function EmailAnalyzer() {

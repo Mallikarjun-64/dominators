@@ -96,18 +96,18 @@
 <body>
   <div class="container">
     <div class="icon">⚠️</div>
-    <h1 id="status">Potential Security Risk</h1>
-    <p>This URL has been flagged as suspicious by the URL Analyser engine.</p>
+    <h1 id="status" data-i18n="potentialRisk">Potential Security Risk</h1>
+    <p data-i18n="flaggedMessage">This URL has been flagged as suspicious by the Human Firewall engine.</p>
     
     <div class="details">
-      <div><strong>URL:</strong> <span id="url-text" style="word-break: break-all; opacity: 0.8;"></span></div>
-      <div><strong>Confidence:</strong> <span id="confidence">0%</span></div>
+      <div><strong data-i18n="url">URL:</strong> <span id="url-text" style="word-break: break-all; opacity: 0.8;"></span></div>
+      <div><strong data-i18n="confidence">Confidence:</strong> <span id="confidence">0%</span></div>
       <div id="indicators-container" class="indicators"></div>
     </div>
 
     <div class="actions">
-      <button class="btn-back" id="btn-back">Go Back to Safety</button>
-      <button class="btn-allow" id="btn-allow">Always Allow this URL</button>
+      <button class="btn-back" id="btn-back" data-i18n="goBack">Go Back to Safety</button>
+      <button class="btn-allow" id="btn-allow" data-i18n="alwaysAllow">Always Allow this URL</button>
     </div>
   </div>
   <script src="warning.js"></script>

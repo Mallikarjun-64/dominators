@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Globe, ShieldAlert, AlertCircle, ShieldCheck, Loader2, Link2, LayoutGrid, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../../navigation";
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "@/services/firebaseConfig";
 
